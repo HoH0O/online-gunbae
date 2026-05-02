@@ -1,6 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
 import Glass from './components/Glass';
-import Bottle from './components/Bottle';
 import CheersPopup from './components/CheersPopup';
 import RoomSetup from './components/RoomSetup';
 import RoomBar from './components/RoomBar';
@@ -15,6 +14,7 @@ import { generateRoomCode } from './core/realtime';
 import { CHEERS_MESSAGES, DEFAULT_THEME } from './config/theme';
 import { readRoomFromURL, writeRoomToURL } from './lib/url';
 import { storage, KEYS } from './lib/storage';
+import { eulReul } from './lib/korean';
 
 export default function App() {
   // URL 을 한 번만 읽어 host/guest 결정.
@@ -95,10 +95,14 @@ export default function App() {
         <button
           type="button"
           onClick={() => setSettingsOpen(true)}
-          aria-label="설정 열기"
-          className="absolute top-4 right-4 z-20 w-10 h-10 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-lg flex items-center justify-center active:scale-95 transition hover:bg-white/15"
+          aria-label="메뉴 열기"
+          className="absolute top-4 right-4 z-20 w-10 h-10 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white flex items-center justify-center active:scale-95 transition hover:bg-white/15"
         >
-          ⚙️
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <line x1="4" y1="7" x2="20" y2="7" />
+            <line x1="4" y1="12" x2="20" y2="12" />
+            <line x1="4" y1="17" x2="20" y2="17" />
+          </svg>
         </button>
       )}
 
@@ -106,25 +110,27 @@ export default function App() {
         <ThemePicker theme={theme} onChange={setTheme} />
       </SettingsSidebar>
 
-      <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-        <div className="flex items-end gap-1 sm:gap-3">
-          <div className="w-48 h-64 sm:w-56 sm:h-72 flex items-center justify-center">
-            <Glass
-              glass={theme.glass}
-              liquidColor={theme.drink.liquidColor}
-              foamColor={theme.drink.foamColor}
-              fillLevel={0.85}
-              cheering={active}
-            />
-          </div>
-          <div className="w-24 h-56 sm:w-28 sm:h-64 flex items-end justify-center">
-            <Bottle drink={theme.drink} className="w-full h-full" />
-          </div>
+      <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none px-6 text-center">
+        <div className="w-56 h-72 sm:w-64 sm:h-80 flex items-center justify-center">
+          <Glass
+            glass={theme.glass}
+            liquidColor={theme.drink.liquidColor}
+            foamColor={theme.drink.foamColor}
+            fillLevel={0.85}
+            cheering={active}
+          />
         </div>
-        <p className="mt-6 text-white/80 text-sm tracking-wide">
-          {ready ? '핸드폰을 부딪쳐 보세요' : '시작하려면 입장해주세요'}
-        </p>
-        <p className="mt-1 text-white/40 text-xs">{theme.drink.label}</p>
+        {ready ? (
+          <>
+            <p className="mt-6 text-white text-base sm:text-lg font-medium">
+              현재 <span className="text-yellow-300 font-bold">{theme.drink.label}</span>
+              {eulReul(theme.drink.label)} 마시는 중입니다
+            </p>
+            <p className="mt-2 text-white/55 text-xs">핸드폰을 부딪쳐 짠!</p>
+          </>
+        ) : (
+          <p className="mt-6 text-white/80 text-sm tracking-wide">시작하려면 입장해주세요</p>
+        )}
       </div>
 
       <CheersPopup visible={active} message={message} />

@@ -10,18 +10,8 @@
     "image": null
   },
   {
-    "id": "pint-glass",
+    "id": "beer-mug",
     "label": "맥주잔",
-    "viewBox": "0 0 120 200",
-    "cupPath": "M22 20 L98 20 L88 188 Q60 198 32 188 Z",
-    "rimPath": "M22 20 L98 20",
-    "stemPath": null,
-    "liquidArea": { "top": 20, "bottom": 188 },
-    "image": null
-  },
-  {
-    "id": "mug",
-    "label": "호프",
     "viewBox": "0 0 150 200",
     "cupPath": "M22 20 L100 20 L100 188 Q61 196 22 188 Z",
     "rimPath": "M22 20 L100 20",
@@ -30,18 +20,8 @@
     "image": null
   },
   {
-    "id": "weizen-glass",
-    "label": "밀맥주잔",
-    "viewBox": "0 0 120 230",
-    "cupPath": "M28 20 Q40 80 32 130 Q24 180 36 220 Q60 230 84 220 Q96 180 88 130 Q80 80 92 20 Z",
-    "rimPath": "M28 20 L92 20",
-    "stemPath": null,
-    "liquidArea": { "top": 20, "bottom": 220 },
-    "image": null
-  },
-  {
-    "id": "wine-red",
-    "label": "레드와인 잔",
+    "id": "wine-glass",
+    "label": "와인잔",
     "viewBox": "0 0 120 220",
     "cupPath": "M20 20 Q20 90 60 110 Q100 90 100 20 Z",
     "rimPath": "M20 20 L100 20",
@@ -50,38 +30,8 @@
     "image": null
   },
   {
-    "id": "wine-white",
-    "label": "화이트와인 잔",
-    "viewBox": "0 0 120 220",
-    "cupPath": "M30 20 Q34 100 60 115 Q86 100 90 20 Z",
-    "rimPath": "M30 20 L90 20",
-    "stemPath": "M58 115 L58 185 L42 198 L78 198 L62 185 L62 115",
-    "liquidArea": { "top": 20, "bottom": 115 },
-    "image": null
-  },
-  {
-    "id": "champagne-flute",
-    "label": "샴페인 플루트",
-    "viewBox": "0 0 100 240",
-    "cupPath": "M32 20 L42 158 L58 158 L68 20 Z",
-    "rimPath": "M32 20 L68 20",
-    "stemPath": "M50 158 L50 215 L32 222 L68 222 L50 215",
-    "liquidArea": { "top": 20, "bottom": 158 },
-    "image": null
-  },
-  {
-    "id": "champagne-coupe",
-    "label": "쿠페",
-    "viewBox": "0 0 150 200",
-    "cupPath": "M15 30 Q15 78 75 80 Q135 78 135 30 Z",
-    "rimPath": "M15 30 L135 30",
-    "stemPath": "M73 80 L73 160 L48 175 L102 175 L77 160 L77 80",
-    "liquidArea": { "top": 30, "bottom": 80 },
-    "image": null
-  },
-  {
     "id": "martini",
-    "label": "마티니",
+    "label": "마티니잔",
     "viewBox": "0 0 150 200",
     "cupPath": "M15 30 L75 110 L135 30 Z",
     "rimPath": "M15 30 L135 30",
@@ -91,42 +41,12 @@
   },
   {
     "id": "rocks-glass",
-    "label": "온더락",
+    "label": "온더락잔",
     "viewBox": "0 0 140 140",
     "cupPath": "M22 20 L118 20 L112 124 Q70 134 28 124 Z",
     "rimPath": "M22 20 L118 20",
     "stemPath": null,
     "liquidArea": { "top": 20, "bottom": 124 },
-    "image": null
-  },
-  {
-    "id": "highball",
-    "label": "하이볼",
-    "viewBox": "0 0 100 220",
-    "cupPath": "M18 20 L82 20 L78 208 Q50 216 22 208 Z",
-    "rimPath": "M18 20 L82 20",
-    "stemPath": null,
-    "liquidArea": { "top": 20, "bottom": 208 },
-    "image": null
-  },
-  {
-    "id": "snifter",
-    "label": "스니프터",
-    "viewBox": "0 0 140 180",
-    "cupPath": "M40 30 Q5 60 25 105 Q40 140 70 142 Q100 140 115 105 Q135 60 100 30 Z",
-    "rimPath": "M40 30 L100 30",
-    "stemPath": "M68 142 L68 162 L48 175 L92 175 L72 162",
-    "liquidArea": { "top": 70, "bottom": 142 },
-    "image": null
-  },
-  {
-    "id": "tulip-glass",
-    "label": "튤립잔",
-    "viewBox": "0 0 120 230",
-    "cupPath": "M28 20 Q22 70 36 95 Q26 130 40 165 Q60 175 80 165 Q94 130 84 95 Q98 70 92 20 Z",
-    "rimPath": "M28 20 L92 20",
-    "stemPath": "M58 175 L58 210 L42 220 L78 220 L62 210",
-    "liquidArea": { "top": 20, "bottom": 165 },
     "image": null
   }
 ]
