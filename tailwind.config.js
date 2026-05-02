@@ -16,11 +16,16 @@ export default {
           '0%': { transform: 'translateX(0%)' },
           '100%': { transform: 'translateX(-50%)' },
         },
+        rotatePhone: {
+          '0%, 30%, 100%': { transform: 'rotate(-90deg)' },
+          '60%, 80%': { transform: 'rotate(0deg)' },
+        },
       },
       animation: {
         wave: 'wave 2.5s ease-in-out infinite',
         sparkle: 'sparkle 1.6s ease-in-out infinite',
         marquee: 'marquee 22s linear infinite',
+        'rotate-phone': 'rotatePhone 2.4s ease-in-out infinite',
       },
     },
   },

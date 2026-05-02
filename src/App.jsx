@@ -7,6 +7,7 @@ import MembersList from './components/MembersList';
 import ThemePicker from './components/ThemePicker';
 import CheersMessagesEditor from './components/CheersMessagesEditor';
 import SettingsSidebar from './components/SettingsSidebar';
+import OrientationGate from './components/OrientationGate';
 import { useMotionSensor } from './hooks/useMotionSensor';
 import { useCheers } from './hooks/useCheers';
 import { useRoom } from './hooks/useRoom';
@@ -108,6 +109,7 @@ export default function App() {
 
   return (
     <div className={`relative w-full h-full overflow-hidden ${theme.background.className}`}>
+      <OrientationGate />
       <Sparkles />
 
       {ready && <RoomBar roomId={session.roomId} title={session.title} memberCount={members.length || 1} status={status} />}
