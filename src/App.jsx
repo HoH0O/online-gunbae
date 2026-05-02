@@ -1,14 +1,16 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import Glass from './components/Glass';
 import CheersPopup from './components/CheersPopup';
 import RoomSetup from './components/RoomSetup';
 import RoomBar from './components/RoomBar';
 import MembersList from './components/MembersList';
 import ThemePicker from './components/ThemePicker';
+import CheersMessagesEditor from './components/CheersMessagesEditor';
 import SettingsSidebar from './components/SettingsSidebar';
 import { useMotionSensor } from './hooks/useMotionSensor';
 import { useCheers } from './hooks/useCheers';
 import { useRoom } from './hooks/useRoom';
+import { useCustomMessages } from './hooks/useCustomMessages';
 import { triggerCheers } from './core/cheersTrigger';
 import { generateRoomCode } from './core/realtime';
 import { CHEERS_MESSAGES, DEFAULT_THEME } from './config/theme';
@@ -33,6 +35,27 @@ export default function App() {
   const [session, setSession] = useState(null);
   const [theme, setTheme] = useState(DEFAULT_THEME);
   const [settingsOpen, setSettingsOpen] = useState(false);
+
+  // 사용자 건배사 (localStorage 영속)
+  const customMessages = useCustomMessages();
+
+  // 기본 + 사용자 건배사 합본. 짠 발동 순서대로 순환.
+  const messagePool = useMemo(
+    () => [...CHEERS_MESSAGES, ...customMessages.messages],
+    [customMessages.messages],
+  );
+  const cheersCounterRef = useRef(0);
+
+  // 로컬 짠 트리거 — 다음 메시지를 골라 페이로드에 실어 송신.
+  // 받는 쪽(원격)은 페이로드의 message 를 그대로 표시.
+  const fireLocalCheers = useCallback(
+    (source, extra = {}) => {
+      const msg = messagePool[cheersCounterRef.current % messagePool.length];
+      cheersCounterRef.current += 1;
+      triggerCheers(source, { ...extra, message: msg });
+    },
+    [messagePool],
+  );
 
   const handleSetupSubmit = useCallback(
     ({ title, nickname }) => {
@@ -62,10 +85,13 @@ export default function App() {
 
   const ready = !!session;
 
-  // 충격 감지 -> triggerCheers 호출 (UI 와 결합 X)
-  const handleShake = useCallback(({ delta, magnitude }) => {
-    triggerCheers('local', { delta, magnitude });
-  }, []);
+  // 충격 감지 -> fireLocalCheers (메시지 부착 + 트리거)
+  const handleShake = useCallback(
+    ({ delta, magnitude }) => {
+      fireLocalCheers('local', { delta, magnitude });
+    },
+    [fireLocalCheers],
+  );
   useMotionSensor({ enabled: ready, onShake: handleShake });
 
   // Supabase 룸 참여
@@ -76,13 +102,9 @@ export default function App() {
     isHost: session?.isHost ?? false,
   });
 
-  // 건배 이벤트 구독
+  // 건배 이벤트 구독 — 페이로드의 message 를 그대로 표시 (원격이든 로컬이든)
   const { active, count, lastEvent } = useCheers();
-
-  const message = useMemo(() => {
-    if (!lastEvent) return CHEERS_MESSAGES[0];
-    return CHEERS_MESSAGES[count % CHEERS_MESSAGES.length];
-  }, [lastEvent, count]);
+  const message = lastEvent?.message ?? CHEERS_MESSAGES[0];
 
   return (
     <div className={`relative w-full h-full overflow-hidden ${theme.background.className}`}>
@@ -108,6 +130,15 @@ export default function App() {
 
       <SettingsSidebar open={settingsOpen} onClose={() => setSettingsOpen(false)} title="설정">
         <ThemePicker theme={theme} onChange={setTheme} />
+        <div className="my-6 border-t border-white/10" />
+        <div>
+          <h3 className="text-xs uppercase tracking-wider text-white/50 mb-2">건배사</h3>
+          <CheersMessagesEditor
+            messages={customMessages.messages}
+            onAdd={customMessages.add}
+            onRemove={customMessages.remove}
+          />
+        </div>
       </SettingsSidebar>
 
       <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none px-6 text-center">

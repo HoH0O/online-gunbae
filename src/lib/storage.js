@@ -20,4 +20,5 @@ export const storage = {
 export const KEYS = {
   nickname: 'gunbae:nickname',
   hostOf: (roomId) => `gunbae:hostOf:${roomId}`,
+  customMessages: 'gunbae:customMessages',
 };
