@@ -164,7 +164,7 @@ export default function App() {
         )}
       </div>
 
-      <CheersPopup visible={active} message={message} />
+      <CheersPopup visible={active} message={message} nonce={count} />
 
       {ready && (
         <div className="absolute bottom-20 left-3 text-xs text-white/60 pointer-events-none">
