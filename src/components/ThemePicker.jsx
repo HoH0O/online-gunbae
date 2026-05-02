@@ -6,7 +6,7 @@ export default function ThemePicker({ theme, onChange }) {
   const update = (patch) => onChange({ ...theme, ...patch });
 
   return (
-    <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 flex gap-2 flex-wrap justify-center px-3">
+    <div className="flex gap-2 flex-wrap justify-center px-3">
       <Select
         label="잔"
         value={theme.glass.id}

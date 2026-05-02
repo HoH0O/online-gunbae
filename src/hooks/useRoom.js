@@ -1,35 +1,30 @@
 import { useEffect, useState } from 'react';
-import { joinRoom, generateRoomCode, isRealtimeConfigured } from '../core/realtime';
+import { joinRoom, isRealtimeConfigured } from '../core/realtime';
 
-// URL ?room= 파라미터에서 룸코드 읽기. 없으면 생성하고 URL 업데이트.
-function readOrCreateRoomCode() {
-  if (typeof window === 'undefined') return generateRoomCode();
-  const params = new URLSearchParams(window.location.search);
-  const existing = params.get('room');
-  if (existing) return existing.toUpperCase();
-  const fresh = generateRoomCode();
-  params.set('room', fresh);
-  const next = `${window.location.pathname}?${params.toString()}${window.location.hash}`;
-  window.history.replaceState({}, '', next);
-  return fresh;
-}
-
-export function useRoom({ enabled }) {
-  const [roomId, setRoomId] = useState(null);
-  const [members, setMembers] = useState(1);
+/**
+ * 룸 참여/유지 훅. setup 이 끝난 뒤 enabled=true 로 전환되어야 호출된다.
+ *
+ * @param {object} opts
+ * @param {boolean} opts.enabled
+ * @param {string|null} opts.roomId
+ * @param {string} opts.nickname
+ * @param {boolean} opts.isHost
+ */
+export function useRoom({ enabled, roomId, nickname, isHost }) {
+  const [members, setMembers] = useState([]);
   const [status, setStatus] = useState(isRealtimeConfigured ? 'idle' : 'disabled');
 
   useEffect(() => {
-    if (!enabled) return;
-    const code = readOrCreateRoomCode();
-    setRoomId(code);
+    if (!enabled || !roomId || !nickname) return;
 
-    const handle = joinRoom(code, {
-      onPresence: setMembers,
+    const handle = joinRoom(roomId, {
+      nickname,
+      isHost,
+      onMembers: setMembers,
       onStatus: setStatus,
     });
     return () => handle.leave();
-  }, [enabled]);
+  }, [enabled, roomId, nickname, isHost]);
 
-  return { roomId, members, status };
+  return { members, status };
 }

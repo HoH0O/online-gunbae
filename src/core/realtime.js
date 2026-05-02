@@ -1,7 +1,7 @@
 // Supabase Realtime 연결 모듈.
 // - 로컬 짠 -> 같은 룸의 다른 사람들에게 브로드캐스트
 // - 다른 사람의 짠 -> triggerCheers('remote') -> 같은 애니메이션 자동 재생
-// - presence 로 룸 인원 수 추적
+// - presence 로 룸 인원/닉네임/호스트 여부 추적
 //
 // 핵심: 이 파일은 eventBus 와 cheersTrigger 만 알고, UI(React) 와는 완전히 분리.
 
@@ -14,7 +14,6 @@ const key = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 export const isRealtimeConfigured = Boolean(url && key);
 
-// 클라이언트는 한 번만 만든다.
 const supabase = isRealtimeConfigured
   ? createClient(url, key, {
       realtime: { params: { eventsPerSecond: 10 } },
@@ -28,19 +27,27 @@ const selfId =
     ? crypto.randomUUID()
     : Math.random().toString(36).slice(2);
 
+export function getSelfId() {
+  return selfId;
+}
+
 /**
  * 룸 참여. 한 룸에 한 채널.
  *
  * @param {string} roomId
- * @param {object} handlers
- * @param {(count:number)=>void} handlers.onPresence - 룸 인원 변화
- * @param {(status:'connecting'|'connected'|'error'|'disabled')=>void} handlers.onStatus
+ * @param {object} opts
+ * @param {string} opts.nickname
+ * @param {boolean} [opts.isHost]
+ * @param {(members: Array<{id:string,nickname:string,isHost:boolean,joinedAt:number}>) => void} [opts.onMembers]
+ * @param {(status:'connecting'|'connected'|'error'|'disabled') => void} [opts.onStatus]
  * @returns {{ leave: () => void }}
  */
-export function joinRoom(roomId, { onPresence, onStatus } = {}) {
+export function joinRoom(roomId, { nickname, isHost = false, onMembers, onStatus } = {}) {
   if (!isRealtimeConfigured) {
     onStatus?.('disabled');
-    console.warn('[realtime] VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY 가 설정되지 않음 - 오프라인 모드');
+    // 오프라인 모드: 자기 자신만 멤버로 통보
+    onMembers?.([{ id: selfId, nickname: nickname || '나', isHost: true, joinedAt: Date.now() }]);
+    console.warn('[realtime] VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY 미설정 - 오프라인 모드');
     return { leave: () => {} };
   }
 
@@ -58,18 +65,33 @@ export function joinRoom(roomId, { onPresence, onStatus } = {}) {
     triggerCheers('remote', payload);
   });
 
-  // 2. presence: 룸 인원 추적
-  const reportCount = () => {
+  // 2. presence: 룸 멤버 메타데이터 동기화
+  const reportMembers = () => {
     const state = channel.presenceState();
-    onPresence?.(Object.keys(state).length);
+    const members = Object.entries(state)
+      .map(([id, presences]) => {
+        const meta = presences[0] || {};
+        return {
+          id,
+          nickname: meta.nickname || '익명',
+          isHost: !!meta.isHost,
+          joinedAt: meta.joinedAt || 0,
+        };
+      })
+      .sort((a, b) => a.joinedAt - b.joinedAt);
+    onMembers?.(members);
   };
-  channel.on('presence', { event: 'sync' }, reportCount);
-  channel.on('presence', { event: 'join' }, reportCount);
-  channel.on('presence', { event: 'leave' }, reportCount);
+  channel.on('presence', { event: 'sync' }, reportMembers);
+  channel.on('presence', { event: 'join' }, reportMembers);
+  channel.on('presence', { event: 'leave' }, reportMembers);
 
   channel.subscribe(async (status) => {
     if (status === 'SUBSCRIBED') {
-      await channel.track({ joinedAt: Date.now() });
+      await channel.track({
+        nickname,
+        isHost,
+        joinedAt: Date.now(),
+      });
       onStatus?.('connected');
     } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
       onStatus?.('error');
@@ -78,12 +100,13 @@ export function joinRoom(roomId, { onPresence, onStatus } = {}) {
 
   // 3. 로컬에서 발생한 짠을 룸으로 송신.
   //    'remote' 출처는 다시 보내지 않아 무한루프 방지.
+  //    payload 에 닉네임을 함께 실어 받는 쪽에서 누가 짠 했는지 표시 가능.
   const offBus = eventBus.on(EVENTS.CHEERS, (e) => {
     if (e.source === 'remote') return;
     channel.send({
       type: 'broadcast',
       event: 'cheers',
-      payload: { from: selfId, ...e },
+      payload: { from: selfId, nickname, ...e },
     });
   });
 
