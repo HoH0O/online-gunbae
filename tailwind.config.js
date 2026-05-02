@@ -1,0 +1,23 @@
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: ['./index.html', './src/**/*.{js,jsx,ts,tsx}'],
+  theme: {
+    extend: {
+      keyframes: {
+        wave: {
+          '0%, 100%': { transform: 'translateX(-25%) rotate(0deg)' },
+          '50%': { transform: 'translateX(-25%) rotate(2deg)' },
+        },
+        sparkle: {
+          '0%, 100%': { opacity: 0.3, transform: 'scale(1)' },
+          '50%': { opacity: 1, transform: 'scale(1.4)' },
+        },
+      },
+      animation: {
+        wave: 'wave 2.5s ease-in-out infinite',
+        sparkle: 'sparkle 1.6s ease-in-out infinite',
+      },
+    },
+  },
+  plugins: [],
+};
