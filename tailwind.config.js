@@ -12,10 +12,15 @@ export default {
           '0%, 100%': { opacity: 0.3, transform: 'scale(1)' },
           '50%': { opacity: 1, transform: 'scale(1.4)' },
         },
+        marquee: {
+          '0%': { transform: 'translateX(0%)' },
+          '100%': { transform: 'translateX(-50%)' },
+        },
       },
       animation: {
         wave: 'wave 2.5s ease-in-out infinite',
         sparkle: 'sparkle 1.6s ease-in-out infinite',
+        marquee: 'marquee 22s linear infinite',
       },
     },
   },

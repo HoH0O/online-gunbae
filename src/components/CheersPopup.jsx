@@ -28,7 +28,7 @@ export default function CheersPopup({ visible, message, nonce = 0 }) {
       {visible && (
         <motion.div
           key="cheers"
-          className="pointer-events-none absolute left-0 right-0 top-[12vh] sm:top-[14vh] flex justify-center z-20 px-4"
+          className="pointer-events-none absolute left-0 right-0 top-[22vh] sm:top-[18vh] flex justify-center z-20 px-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
