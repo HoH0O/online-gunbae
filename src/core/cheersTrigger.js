@@ -11,9 +11,11 @@ import { eventBus, EVENTS } from './eventBus';
  * @param {object} [payload] - 부가 데이터 (가속도 magnitude, 원격 사용자 id 등)
  */
 export function triggerCheers(source = 'local', payload = {}) {
+  // 주의: payload 가 source 필드를 가져도 항상 인자로 받은 source 가 우선이어야 한다.
+  // (원격 수신 시 'remote' 가 덮이지 않도록 spread 를 source 보다 먼저 둔다.)
   eventBus.emit(EVENTS.CHEERS, {
-    source,
     ts: Date.now(),
     ...payload,
+    source,
   });
 }
