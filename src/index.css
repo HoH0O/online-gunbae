@@ -2,10 +2,26 @@
 @tailwind components;
 @tailwind utilities;
 
+/* 모바일 풀스크린 잠금 — 핀치줌/더블탭줌/주소바 변동에 의한 레이아웃 깨짐 방지 */
 html, body, #root {
+  position: fixed;
+  inset: 0;
+  width: 100%;
   height: 100%;
   margin: 0;
+  overflow: hidden;
   overscroll-behavior: none;
   -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  touch-action: manipulation;
   font-family: -apple-system, BlinkMacSystemFont, 'Pretendard', 'Segoe UI', Roboto, sans-serif;
+}
+
+/* 입력 필드는 텍스트 선택 / iOS 키보드 동작 허용 */
+input, textarea {
+  -webkit-user-select: text;
+  user-select: text;
+  touch-action: auto;
 }
