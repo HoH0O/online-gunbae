@@ -63,7 +63,7 @@ export default function App() {
   const handleShake = useCallback(({ delta, magnitude }) => {
     triggerCheers('local', { delta, magnitude });
   }, []);
-  const motion = useMotionSensor({ enabled: ready, onShake: handleShake });
+  useMotionSensor({ enabled: ready, onShake: handleShake });
 
   // Supabase 룸 참여
   const { members, status } = useRoom({
@@ -113,8 +113,8 @@ export default function App() {
       </button>
 
       {ready && (
-        <div className="absolute bottom-20 left-2 text-[10px] text-white/40 font-mono pointer-events-none">
-          mag {motion.magnitude.toFixed(1)} · Δ {motion.delta.toFixed(1)} · count {count}
+        <div className="absolute bottom-20 left-3 text-xs text-white/60 pointer-events-none">
+          마신 횟수 <span className="text-white font-semibold ml-1">{count}</span>
         </div>
       )}
 
