@@ -6,7 +6,7 @@
 // 기기마다 가속도 센서 민감도가 달라 기기별 조정이 필요할 수 있다.
 // magnitude delta 가 SHAKE_THRESHOLD 를 넘으면 건배 트리거 발생.
 export const MOTION_CONFIG = {
-  SHAKE_THRESHOLD: 5,       // m/s^2 단위, 6~8 민감 / 10~12 보통 / 15+ 둔감
+  SHAKE_THRESHOLD: 1,       // m/s^2 단위, 6~8 민감 / 10~12 보통 / 15+ 둔감
   COOLDOWN_MS: 1200,        // 한 번 건배 후 다음 트리거까지 무시할 시간
   SAMPLE_SMOOTHING: 0.8,    // 0~1, 클수록 노이즈에 둔감
 };
