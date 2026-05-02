@@ -3,8 +3,10 @@ import Glass from './components/Glass';
 import CheersPopup from './components/CheersPopup';
 import PermissionGate from './components/PermissionGate';
 import ThemePicker from './components/ThemePicker';
+import RoomBar from './components/RoomBar';
 import { useMotionSensor } from './hooks/useMotionSensor';
 import { useCheers } from './hooks/useCheers';
+import { useRoom } from './hooks/useRoom';
 import { triggerCheers } from './core/cheersTrigger';
 import { CHEERS_MESSAGES, DEFAULT_THEME } from './config/theme';
 
@@ -19,6 +21,9 @@ export default function App() {
   }, []);
 
   const motion = useMotionSensor({ enabled: ready, onShake: handleShake });
+
+  // Supabase 룸 참여 (권한 통과 후 활성화)
+  const { roomId, members, status } = useRoom({ enabled: ready });
 
   // 건배 이벤트 구독 (local/button/remote 어디서 와도 동일하게 처리)
   const { active, count, lastEvent } = useCheers();
@@ -36,6 +41,9 @@ export default function App() {
 
       {/* 테마 변경 (잔/술/배경) */}
       {ready && <ThemePicker theme={theme} onChange={setTheme} />}
+
+      {/* 룸 정보 + 공유 */}
+      {ready && <RoomBar roomId={roomId} members={members} status={status} />}
 
       {/* 메인 술잔 */}
       <div className="absolute inset-0 flex flex-col items-center justify-center">
