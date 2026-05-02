@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import Glass from './components/Glass';
+import Bottle from './components/Bottle';
 import CheersPopup from './components/CheersPopup';
 import RoomSetup from './components/RoomSetup';
 import RoomBar from './components/RoomBar';
@@ -105,17 +106,25 @@ export default function App() {
         <ThemePicker theme={theme} onChange={setTheme} />
       </SettingsSidebar>
 
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <Glass
-          shape={theme.glass.id}
-          liquidColor={theme.drink.liquidColor}
-          foamColor={theme.drink.foamColor}
-          fillLevel={0.85}
-          cheering={active}
-        />
+      <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+        <div className="flex items-end gap-1 sm:gap-3">
+          <div className="w-48 h-64 sm:w-56 sm:h-72 flex items-center justify-center">
+            <Glass
+              glass={theme.glass}
+              liquidColor={theme.drink.liquidColor}
+              foamColor={theme.drink.foamColor}
+              fillLevel={0.85}
+              cheering={active}
+            />
+          </div>
+          <div className="w-24 h-56 sm:w-28 sm:h-64 flex items-end justify-center">
+            <Bottle drink={theme.drink} className="w-full h-full" />
+          </div>
+        </div>
         <p className="mt-6 text-white/80 text-sm tracking-wide">
           {ready ? '핸드폰을 부딪쳐 보세요' : '시작하려면 입장해주세요'}
         </p>
+        <p className="mt-1 text-white/40 text-xs">{theme.drink.label}</p>
       </div>
 
       <CheersPopup visible={active} message={message} />
