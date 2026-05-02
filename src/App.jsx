@@ -5,6 +5,7 @@ import RoomSetup from './components/RoomSetup';
 import RoomBar from './components/RoomBar';
 import MembersList from './components/MembersList';
 import ThemePicker from './components/ThemePicker';
+import SettingsSidebar from './components/SettingsSidebar';
 import { useMotionSensor } from './hooks/useMotionSensor';
 import { useCheers } from './hooks/useCheers';
 import { useRoom } from './hooks/useRoom';
@@ -30,6 +31,7 @@ export default function App() {
   // setup 완료 전: null. 완료 후: { roomId, title, nickname, isHost }
   const [session, setSession] = useState(null);
   const [theme, setTheme] = useState(DEFAULT_THEME);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const handleSetupSubmit = useCallback(
     ({ title, nickname }) => {
@@ -87,7 +89,21 @@ export default function App() {
 
       {ready && <RoomBar roomId={session.roomId} title={session.title} memberCount={members.length || 1} status={status} />}
       {ready && <MembersList members={members} />}
-      {ready && <ThemePickerSlot theme={theme} setTheme={setTheme} />}
+
+      {ready && (
+        <button
+          type="button"
+          onClick={() => setSettingsOpen(true)}
+          aria-label="설정 열기"
+          className="absolute top-4 right-4 z-20 w-10 h-10 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-lg flex items-center justify-center active:scale-95 transition hover:bg-white/15"
+        >
+          ⚙️
+        </button>
+      )}
+
+      <SettingsSidebar open={settingsOpen} onClose={() => setSettingsOpen(false)} title="설정">
+        <ThemePicker theme={theme} onChange={setTheme} />
+      </SettingsSidebar>
 
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <Glass
@@ -104,14 +120,6 @@ export default function App() {
 
       <CheersPopup visible={active} message={message} />
 
-      <button
-        type="button"
-        onClick={() => triggerCheers('button')}
-        className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 px-6 py-2.5 rounded-full bg-white/15 text-white text-sm backdrop-blur-md border border-white/20 active:scale-95 transition"
-      >
-        🥂 짠! (테스트)
-      </button>
-
       {ready && (
         <div className="absolute bottom-20 left-3 text-xs text-white/60 pointer-events-none">
           마신 횟수 <span className="text-white font-semibold ml-1">{count}</span>
@@ -126,15 +134,6 @@ export default function App() {
           onSubmit={handleSetupSubmit}
         />
       )}
-    </div>
-  );
-}
-
-// ThemePicker 위치를 MembersList 와 안 겹치게 살짝 아래로 내림
-function ThemePickerSlot({ theme, setTheme }) {
-  return (
-    <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-10">
-      <ThemePicker theme={theme} onChange={setTheme} />
     </div>
   );
 }
