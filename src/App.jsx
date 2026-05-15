@@ -108,7 +108,13 @@ export default function App() {
   });
 
   // 멤버 ready 상태 추적. 전원 ready 되면 로컬에서 최종 cheers 발사.
-  const memberIds = useMemo(() => members.map((m) => m.id), [members]);
+  // presence sync 가 늦게 도착해도 자기 자신은 항상 참여자로 강제 포함.
+  // (그렇지 않으면 memberIds=[상대만] 상태에서 상대 ready 한 번에 false-positive 발사됨)
+  const memberIds = useMemo(() => {
+    const ids = new Set(members.map((m) => m.id));
+    ids.add(getSelfId());
+    return Array.from(ids);
+  }, [members]);
   const handleAllReady = useCallback((finalMessage) => {
     triggerCheers('local', { message: finalMessage });
   }, []);

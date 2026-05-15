@@ -6,10 +6,7 @@ import { getSelfId } from '../core/realtime';
  * - 컨테이너 폭 안에 들어가면 중앙 정렬 + 줄바꿈
  * - 폭을 넘기면 가로 마퀴 (우 → 좌, 무한 루프) 로 자동 전환
  * - readyMap 에 포함된 멤버는 닉네임 아래 "건배해요!" 말풍선 표시
- *
- * @param {object} props
- * @param {Array} props.members
- * @param {Map<string, {nickname,message,ts}>} [props.readyMap]
+ *   (말풍선은 inline block 으로 배치 — overflow 클립 회피)
  */
 export default function MembersList({ members, readyMap }) {
   const containerRef = useRef(null);
@@ -45,7 +42,10 @@ export default function MembersList({ members, readyMap }) {
     const isSelf = !dup && m.id === selfId;
     const isReady = !!readyMap?.has(m.id) && !dup;
     return (
-      <div key={dup ? `dup-${m.id}` : m.id} className="relative shrink-0">
+      <div
+        key={dup ? `dup-${m.id}` : m.id}
+        className="flex flex-col items-center gap-1.5 shrink-0"
+      >
         <span
           aria-hidden={dup ? 'true' : undefined}
           className={[
@@ -60,11 +60,12 @@ export default function MembersList({ members, readyMap }) {
           {isSelf && <span className="text-[10px] opacity-60">(나)</span>}
         </span>
 
+        {/* 말풍선 (inline 으로 배치 — chip 폭에 따라 wrapper 높이 자연 확장) */}
         {isReady && (
-          <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1.5 pointer-events-none animate-bounce-soft">
-            <div className="relative bg-yellow-300 text-black text-[11px] font-semibold px-2.5 py-1 rounded-md shadow-lg whitespace-nowrap">
+          <div className="relative animate-bubble-pop">
+            <span className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-yellow-300 rotate-45" />
+            <div className="bg-yellow-300 text-black text-[11px] font-semibold px-2.5 py-1 rounded-md shadow-lg whitespace-nowrap">
               건배해요!
-              <span className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-yellow-300 rotate-45" />
             </div>
           </div>
         )}
@@ -75,12 +76,12 @@ export default function MembersList({ members, readyMap }) {
   return (
     <div
       ref={containerRef}
-      className="absolute top-[5.5rem] left-0 right-0 z-10 overflow-x-hidden overflow-y-visible px-3"
+      className="absolute top-[5.5rem] left-0 right-0 z-10 overflow-x-hidden px-3"
     >
       <div
         ref={innerRef}
         className={[
-          'flex gap-1.5',
+          'flex gap-1.5 items-start',
           shouldScroll
             ? 'animate-marquee w-max'
             : 'justify-center flex-wrap max-w-[92vw] mx-auto',
