@@ -12,6 +12,7 @@ import { useMotionSensor } from './hooks/useMotionSensor';
 import { useCheers } from './hooks/useCheers';
 import { useRoom } from './hooks/useRoom';
 import { useCustomMessages } from './hooks/useCustomMessages';
+import { useDisabledDefaults } from './hooks/useDisabledDefaults';
 import { useReadyTracker } from './hooks/useReadyTracker';
 import { triggerCheers, emitReady } from './core/cheersTrigger';
 import { generateRoomCode, getSelfId } from './core/realtime';
@@ -43,14 +44,17 @@ export default function App() {
   const [theme, setTheme] = useState(DEFAULT_THEME);
   const [settingsOpen, setSettingsOpen] = useState(false);
 
-  // 사용자 건배사 (localStorage 영속)
+  // 사용자 건배사 + 비활성화한 기본 건배사 (localStorage 영속)
   const customMessages = useCustomMessages();
+  const disabledDefaults = useDisabledDefaults();
 
-  // 기본 + 사용자 건배사 합본. 짠 발동 순서대로 순환.
-  const messagePool = useMemo(
-    () => [...CHEERS_MESSAGES, ...customMessages.messages],
-    [customMessages.messages],
-  );
+  // 활성 기본 + 사용자 건배사 합본. 짠 발동 순서대로 순환.
+  // 풀이 비면 (모두 비활성 + 커스텀 0개) "건배! 🍻" 로 폴백.
+  const messagePool = useMemo(() => {
+    const activeDefaults = CHEERS_MESSAGES.filter((m) => !disabledDefaults.disabled.has(m));
+    const pool = [...activeDefaults, ...customMessages.messages];
+    return pool.length > 0 ? pool : [CHEERS_MESSAGES[0]];
+  }, [disabledDefaults.disabled, customMessages.messages]);
   const cheersCounterRef = useRef(0);
 
   // 로컬 짠 발생 시: 즉시 애니메이션 X. "건배 준비됨" 신호만 발산.
@@ -159,6 +163,8 @@ export default function App() {
             messages={customMessages.messages}
             onAdd={customMessages.add}
             onRemove={customMessages.remove}
+            disabledDefaults={disabledDefaults.disabled}
+            onToggleDefault={disabledDefaults.toggle}
           />
         </div>
       </SettingsSidebar>
