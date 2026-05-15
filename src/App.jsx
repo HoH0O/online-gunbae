@@ -20,14 +20,19 @@ import { storage, KEYS } from './lib/storage';
 import { eulReul } from './lib/korean';
 
 export default function App() {
-  // URL 을 한 번만 읽어 host/guest 결정.
+  // URL 을 한 번만 읽어 setup 화면 모드 / presence host 여부 결정.
+  // - setupIsHost: 화면 분기("방 만들기" vs "방 입장") 는 URL 에만 의존.
+  //   같은 브라우저에서 두 번째 탭으로 들어가는 케이스가 막힘.
+  // - presenceIsHost: 호스트 crown(👑) 만 유지 — wasHost 인 사용자가 새로고침해도
+  //   crown 유지되도록 함.
   const initial = useMemo(() => {
     const { roomId, title } = readRoomFromURL();
     const wasHost = roomId ? storage.get(KEYS.hostOf(roomId)) === '1' : false;
     return {
       roomId,
       title,
-      isHost: !roomId || wasHost, // 룸 코드 없으면 신규 호스트, 있으면 이전 호스트 여부
+      setupIsHost: !roomId,
+      presenceIsHost: !roomId || wasHost,
       nickname: storage.get(KEYS.nickname, ''),
     };
   }, []);
@@ -78,7 +83,7 @@ export default function App() {
         roomId,
         title: resolvedTitle,
         nickname,
-        isHost: initial.isHost,
+        isHost: initial.presenceIsHost,
       });
     },
     [initial],
@@ -176,7 +181,7 @@ export default function App() {
 
       {!ready && (
         <RoomSetup
-          isHost={initial.isHost}
+          isHost={initial.setupIsHost}
           initialTitle={initial.title || ''}
           initialNickname={initial.nickname}
           onSubmit={handleSetupSubmit}
