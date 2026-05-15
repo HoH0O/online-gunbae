@@ -1,12 +1,12 @@
 // Supabase Realtime 연결 모듈.
-// - 로컬 짠 -> 같은 룸의 다른 사람들에게 브로드캐스트
-// - 다른 사람의 짠 -> triggerCheers('remote') -> 같은 애니메이션 자동 재생
+// - 로컬 "건배 준비됨(ready)" 신호 -> 룸 전체로 브로드캐스트
+// - 원격 ready 수신 -> eventBus.READY 로 emit -> useReadyTracker 가 집계
 // - presence 로 룸 인원/닉네임/호스트 여부 추적
 //
-// 핵심: 이 파일은 eventBus 와 cheersTrigger 만 알고, UI(React) 와는 완전히 분리.
+// 핵심: 최종 건배 애니메이션(EVENTS.CHEERS)은 각 클라이언트가 로컬에서
+// "all ready" 를 감지해 독립적으로 발사하므로, 이 파일에서는 브로드캐스트하지 않음.
 
 import { createClient } from '@supabase/supabase-js';
-import { triggerCheers } from './cheersTrigger';
 import { eventBus, EVENTS } from './eventBus';
 
 const url = import.meta.env.VITE_SUPABASE_URL;
@@ -60,9 +60,9 @@ export function joinRoom(roomId, { nickname, isHost = false, onMembers, onStatus
     },
   });
 
-  // 1. 다른 사람의 건배 수신 -> 로컬 트리거 (UI 자동 재생)
-  channel.on('broadcast', { event: 'cheers' }, ({ payload }) => {
-    triggerCheers('remote', payload);
+  // 1. 다른 사람의 "건배 준비됨" 신호 수신 -> 로컬 bus 로 전달
+  channel.on('broadcast', { event: 'cheers-ready' }, ({ payload }) => {
+    eventBus.emit(EVENTS.READY, { ...payload, source: 'remote' });
   });
 
   // 2. presence: 룸 멤버 메타데이터 동기화
@@ -98,21 +98,20 @@ export function joinRoom(roomId, { nickname, isHost = false, onMembers, onStatus
     }
   });
 
-  // 3. 로컬에서 발생한 짠을 룸으로 송신.
+  // 3. 로컬 ready 신호 -> 룸 전체로 broadcast.
   //    'remote' 출처는 다시 보내지 않아 무한루프 방지.
-  //    payload 에 닉네임을 함께 실어 받는 쪽에서 누가 짠 했는지 표시 가능.
-  const offBus = eventBus.on(EVENTS.CHEERS, (e) => {
+  const offReady = eventBus.on(EVENTS.READY, (e) => {
     if (e.source === 'remote') return;
     channel.send({
       type: 'broadcast',
-      event: 'cheers',
+      event: 'cheers-ready',
       payload: { from: selfId, nickname, ...e },
     });
   });
 
   return {
     leave: () => {
-      offBus();
+      offReady();
       supabase.removeChannel(channel);
     },
   };

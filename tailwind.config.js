@@ -20,12 +20,23 @@ export default {
           '0%, 30%, 100%': { transform: 'rotate(-90deg)' },
           '60%, 80%': { transform: 'rotate(0deg)' },
         },
+        bubblePop: {
+          '0%': { transform: 'scale(0.6) translateY(-4px)', opacity: 0 },
+          '60%': { transform: 'scale(1.08) translateY(0)', opacity: 1 },
+          '100%': { transform: 'scale(1) translateY(0)', opacity: 1 },
+        },
+        bounceSoft: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-3px)' },
+        },
       },
       animation: {
         wave: 'wave 2.5s ease-in-out infinite',
         sparkle: 'sparkle 1.6s ease-in-out infinite',
         marquee: 'marquee 22s linear infinite',
         'rotate-phone': 'rotatePhone 2.4s ease-in-out infinite',
+        'bubble-pop': 'bubblePop 0.32s ease-out',
+        'bounce-soft': 'bounceSoft 1.4s ease-in-out infinite',
       },
     },
   },

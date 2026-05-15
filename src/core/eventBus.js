@@ -27,5 +27,6 @@ export const eventBus = {
 
 // 사용하는 이벤트 이름은 한 곳에 모은다 (오타 방지).
 export const EVENTS = {
-  CHEERS: 'cheers',
+  CHEERS: 'cheers',       // 최종 건배 (애니메이션 + 메시지) — 로컬 발사
+  READY: 'cheers-ready',  // "건배 준비 됨" 신호 — 룸 전체로 브로드캐스트
 };

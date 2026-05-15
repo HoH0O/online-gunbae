@@ -12,8 +12,9 @@ import { useMotionSensor } from './hooks/useMotionSensor';
 import { useCheers } from './hooks/useCheers';
 import { useRoom } from './hooks/useRoom';
 import { useCustomMessages } from './hooks/useCustomMessages';
-import { triggerCheers } from './core/cheersTrigger';
-import { generateRoomCode } from './core/realtime';
+import { useReadyTracker } from './hooks/useReadyTracker';
+import { triggerCheers, emitReady } from './core/cheersTrigger';
+import { generateRoomCode, getSelfId } from './core/realtime';
 import { CHEERS_MESSAGES, DEFAULT_THEME } from './config/theme';
 import { readRoomFromURL, writeRoomToURL } from './lib/url';
 import { storage, KEYS } from './lib/storage';
@@ -52,16 +53,17 @@ export default function App() {
   );
   const cheersCounterRef = useRef(0);
 
-  // 로컬 짠 트리거 — 다음 메시지를 골라 페이로드에 실어 송신.
-  // 받는 쪽(원격)은 페이로드의 message 를 그대로 표시.
-  const fireLocalCheers = useCallback(
-    (source, extra = {}) => {
-      const msg = messagePool[cheersCounterRef.current % messagePool.length];
-      cheersCounterRef.current += 1;
-      triggerCheers(source, { ...extra, message: msg });
-    },
-    [messagePool],
-  );
+  // 로컬 짠 발생 시: 즉시 애니메이션 X. "건배 준비됨" 신호만 발산.
+  // 룸 전원이 ready 되면 useReadyTracker 가 triggerCheers 로 발사.
+  const fireLocalReady = useCallback(() => {
+    const msg = messagePool[cheersCounterRef.current % messagePool.length];
+    cheersCounterRef.current += 1;
+    emitReady({
+      from: getSelfId(),
+      nickname: session?.nickname || '익명',
+      message: msg,
+    });
+  }, [messagePool, session?.nickname]);
 
   const handleSetupSubmit = useCallback(
     ({ title, nickname }) => {
@@ -91,13 +93,10 @@ export default function App() {
 
   const ready = !!session;
 
-  // 충격 감지 -> fireLocalCheers (메시지 부착 + 트리거)
-  const handleShake = useCallback(
-    ({ delta, magnitude }) => {
-      fireLocalCheers('local', { delta, magnitude });
-    },
-    [fireLocalCheers],
-  );
+  // 충격 감지 -> ready 발산 (애니메이션은 모두 ready 됐을 때만)
+  const handleShake = useCallback(() => {
+    fireLocalReady();
+  }, [fireLocalReady]);
   useMotionSensor({ enabled: ready, onShake: handleShake });
 
   // Supabase 룸 참여
@@ -108,7 +107,17 @@ export default function App() {
     isHost: session?.isHost ?? false,
   });
 
-  // 건배 이벤트 구독 — 페이로드의 message 를 그대로 표시 (원격이든 로컬이든)
+  // 멤버 ready 상태 추적. 전원 ready 되면 로컬에서 최종 cheers 발사.
+  const memberIds = useMemo(() => members.map((m) => m.id), [members]);
+  const handleAllReady = useCallback((finalMessage) => {
+    triggerCheers('local', { message: finalMessage });
+  }, []);
+  const { ready: readyMap } = useReadyTracker({
+    memberIds,
+    onAllReady: handleAllReady,
+  });
+
+  // 건배 이벤트 구독 — 페이로드의 message 를 그대로 표시
   const { active, count, lastEvent } = useCheers();
   const message = lastEvent?.message ?? CHEERS_MESSAGES[0];
 
@@ -118,7 +127,7 @@ export default function App() {
       <Sparkles />
 
       {ready && <RoomBar roomId={session.roomId} title={session.title} memberCount={members.length || 1} status={status} />}
-      {ready && <MembersList members={members} />}
+      {ready && <MembersList members={members} readyMap={readyMap} />}
 
       {ready && (
         <button
